@@ -63,7 +63,6 @@ for index, row in df.iterrows():
         df['NOx mass'][index] = 0.0519828 #mediana de la variable NOx
         
 #Eliminar negativos si fuera necesario
-#borrar columnas sobrantes
 for index, row in df.iterrows():
     if row['NOx mass']<0:
         df.drop(index, axis='index')
