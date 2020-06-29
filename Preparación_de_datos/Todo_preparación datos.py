@@ -19,7 +19,6 @@ def conc(archivo,name):
     final.to_excel(R,'Hoja1')
     R.save()
 
-#print(final.head(10))
 Archn=[('PlenaCarga_B100.xlsx','Final_Plena.xlsx'),('MediaCarga_B100.xlsx','Final_Media.xlsx'),('Vacio_B100.xlsx','Final_Vacio.xlsx')]
  
 for i in range(0,3):
@@ -28,9 +27,9 @@ for i in range(0,3):
 
 ##Agregar las variables Acel, Sobreacel y Carga a los ficheros(después de modificaciones en Excel para eliminar filas intermedias y crear nombres de las columnas)
 def agregar(archivo,name,No): 
-    df=pd.read_excel(archivo)
+    df=pd.read_excel(archivo)  #si da error de lectura cambiar el directorio para donde está los archivos
     df['Carga']=No   #agregar variable estado de la carga 0= vacio,1=media carga,2=carga plena
-    df['Aceleracion']=(df.Velocity - df.Velocity.shift())/3.6 #agregar aceleracion en m/s2, 3.6 conversión a m/s2
+    df['Aceleracion']=(df.Velocity - df.Velocity.shift())/3.6 #agregar aceleracion en m/s2, 3.6 conversión a m/s2 #recordar eliminar las filas con valores str para todos los archivos
     df['Sobreace']=df.Aceleracion - df.Aceleracion.shift()  #agregar sobreaceleracion en m/s3
     R=pd.ExcelWriter(name)
     df.to_excel(R,'Hoja1')
@@ -38,27 +37,19 @@ def agregar(archivo,name,No):
 M=[('PlenaCarga_VarAgregadas.xlsx','Final_Plena.xlsx'),('MediaCarga_VarAgregadas.xlsx','Final_Media.xlsx'),('Vacio_VarAgregadas.xlsx','Final_Vacio.xlsx')]
 Num=[2,1,0]
 for i in range(0,3):
-    Result=agregar(Archn[i][1],Archn[i][0],Num[i])
+    Result=agregar(M[i][1],M[i][0],Num[i])
     Result
 
-##Unir todos los fichero de cada estado de carga en un solo fichero,antes dividir los ficheros en train y test
+##Unir todos los fichero de cada estado de carga en un solo fichero,antes dividir los ficheros en train y test.
 todos=[]
 for f in glob.glob('*.xlsx'):  #solo dejar en la carpeta donde está el código los ficheros que quiero unir
     df=pd.read_excel(f)
     todos.append(pd.read_excel(f))
-    
 df=pd.concat(todos,ignore_index=True)
-
-R=pd.ExcelWriter('Final_todos_train.xlsx')
-df.to_excel(R,'Hoja1')
-R.save()
 
 print(df.shape) #Ver cantidad de filas y columnas, antes de la limpieza 
 
 ##Limpiar el fichero(negativos sustituir mediana y N.A eliminar)
-df=pd.read_excel('Final_todos_train.xlsx')
-
-#df=pd.read_csv('Train_estandarizado.csv')
 #Contar valores negativos de las emisiones de NOx
 R=[]
 for index, row in df.iterrows():
@@ -70,11 +61,33 @@ print('Cantidad=' + str(len(R)))
 for index, row in df.iterrows():
     if row['NOx mass']<0:
         df['NOx mass'][index] = 0.0519828 #mediana de la variable NOx
+        
+#Eliminar negativos si fuera necesario
+#borrar columnas sobrantes
+for index, row in df.iterrows():
+    if row['NOx mass']<0:
+        df.drop(index, axis='index')
+
+#Contar valores nulos(igual 0) de las emisiones de NOx
+L=[]
+for index, row in df.iterrows():
+    if row['NOx mass']==0:
+        L.append(row['NOx mass'])
+
+print(df.isnull().sum()) #calcular cantidad de valores NAN  por culumna, no hay N.A
+
+print(df.shape) #cantidad de filas y columnas después de la limpieza
 
 R=pd.ExcelWriter('Final_Train_Sin_valores_erroneos.xlsx')
 df.to_excel(R,'Hoja1')
 R.save()
 
-print(df.isnull().sum()) #calcular cantidad de valores NAN o nulos por culumna, no hay N.A
-
-print(df.shape) #cantidad de filas y columnas después de la limpieza
+##Unir train y test, para la exploración de los datos,eliminar negativos
+df_train=pd.read_excel('Final_Train_Sin_valores_erroneos.xlsx')
+df_test=pd.read_excel('Final_Test_Sin_valores_erroneos.xlsx')
+df=pd.concat(df_train,df_test,ignore_index=True)
+print(df.shape) #cantidad de filas y columnas después de todos los datos
+print(df.head(10)) #ver 10 primeras filas
+R=pd.ExcelWriter('Final_todos_Sin_valores_erroneos.xlsx')
+df.to_excel(R,'Hoja1')
+R.save()
