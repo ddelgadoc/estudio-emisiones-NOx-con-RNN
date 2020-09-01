@@ -60,7 +60,7 @@ print('Cantidad=' + str(len(R)))
 #Sustituir valores negativos por la mediana
 for index, row in df.iterrows():
     if row['NOx mass']<0:
-        df['NOx mass'][index] = 0.0519828 #mediana de la variable NOx
+        df['NOx mass'][index] = 0.0519828 #mediana de la variable NOx para train, porque no se toma la mediana de todos los datos para que no haya sesgo en test, para test también se tomaría esta ,mediana
         
 #Eliminar negativos si fuera necesario
 for index, row in df.iterrows():
