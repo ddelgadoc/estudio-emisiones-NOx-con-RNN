@@ -32,12 +32,11 @@ var(data_train$NOx.mass)
 sd(data_train$NOx.mass)
 boxplot(data_train$NOx.mass,main="Boxplot de Caudal Másico de NOx",ylab="NOx(g/s)")
 hist(data_train$NOx.mass,main="Histograma del Caudal Másico de NOx",xlab="Emisiones NOx(g/s)",col = "blue")
-x = vector() #determinar cantidad de observaciones nulas en NOx despues de la estandarizacion
+x = 0 #determinar cantidad de observaciones nulas en NOx despues de la estandarizacion
 for (n in data_train$NOx.mass) {
- if(n == 0) append(x,n)
+  if(n == 0) x <<- x + 1
 }
-L = length(x)
-L
+print(x)
 #Estadarización específica para acel y sobreacel
 nor <- function(x) {
   return((x - min(x))/(max(x) - min(x)))
