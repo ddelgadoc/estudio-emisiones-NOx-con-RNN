@@ -30,17 +30,17 @@ mean <- apply(data_train,2,mean)
 std <- apply(data_train,2,sd)
 data_train <- as.data.frame(scale(data_train, center = mean,scale = std))
 ##estandarizar a rango 0-1 para acel y sobreacel
-min <- apply(Train_data[,11:12],2,min) #para destandarizar
+min <- apply(Train_data[,11:12],2,min) #para destandarizar y para la muestra test
 d <- function(x) {
   return(max(x)-min(x))
 }
-den <- apply(Train_data[,11:12],2,d) #para destandarizar
+den <- apply(Train_data[,11:12],2,d) #para destandarizar y para la muestra test
 nor <- function(x) {
   return((x - min(x))/(max(x) - min(x)))
 }
 dt<- as.data.frame(lapply(Train_data[,11:12],nor))
 data <- data.frame(data_train[,1:5],dt,data_train[,6])
-
+write.csv(data,file = "datos_train_estandarizados.csv",row.names = T)
 ##Crear datos de entrada con las secuencias y datos objetivo
 data_1 <- data.matrix(data[,5])#escoger solo las columnas que interesan y convertir a matrix
 data_1 <- data.matrix(data_1)
