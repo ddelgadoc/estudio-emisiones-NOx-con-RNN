@@ -24,6 +24,8 @@ for (n in 1:length(index)){
   Tam_ensayos[[n]]<- index[[n]][[2]]-index[[n]][[1]]
 }
 index <- sample(index) #muestrear los ensayos para que la variable carga sea aleatoria
+#Guardar index de train
+save(index,file = "index_train.RData")
 ##Normalizar
 data_train <- data.frame(Train_data[,4:8],Train_data[,10])
 mean <- apply(data_train,2,mean)
